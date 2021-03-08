@@ -32,7 +32,8 @@ class MainActivity : AppCompatActivity() {
                 { result ->
                     val identifyResult = result as IdentifyEntityMatchesResult
                     val match = identifyResult.entityMatches.firstOrNull()
-                    Log.i("AmplifyQuickstart", "${match?.externalImageId}")
+                    Log.i("AmplifyQuickstart", "externalImageId: ${match?.externalImageId}")
+                    Log.i("AmplifyQuickstart", "confidence: ${match?.confidence}")
                 },
                 { Log.e("AmplifyQuickstart", "Identify failed", it) }
         )
