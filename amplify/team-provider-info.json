@@ -1,0 +1,26 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-opensesami-dev-44911-authRole",
+      "UnauthRoleArn": "arn:aws:iam::801332362964:role/amplify-opensesami-dev-44911-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::801332362964:role/amplify-opensesami-dev-44911-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-opensesami-dev-44911-deployment",
+      "UnauthRoleName": "amplify-opensesami-dev-44911-unauthRole",
+      "StackName": "amplify-opensesami-dev-44911",
+      "StackId": "arn:aws:cloudformation:us-east-1:801332362964:stack/amplify-opensesami-dev-44911/5cbf0cf0-8047-11eb-b58a-0a24d8353619",
+      "AmplifyAppId": "d2vezylv7h836q"
+    },
+    "categories": {
+      "auth": {
+        "opensesami68c2e115": {}
+      },
+      "function": {
+        "RekognitionIndexFacesTriggerf895cf73": {
+          "deploymentBucketName": "amplify-opensesami-dev-44911-deployment",
+          "s3Key": "amplify-builds/RekognitionIndexFacesTriggerf895cf73-525650666f36596e5347-build.zip"
+        }
+      }
+    }
+  }
+}

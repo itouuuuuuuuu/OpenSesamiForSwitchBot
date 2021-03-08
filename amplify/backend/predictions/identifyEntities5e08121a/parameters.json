@@ -1,0 +1,18 @@
+{
+    "resourceName": "identifyEntities5e08121a",
+    "identifyPolicyName": "identifyPolicy9d8486a9",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "adminAuthProtected": "ALLOW",
+    "adminGuestProtected": "ALLOW",
+    "identifyType": "identifyEntities",
+    "access": "authAndGuest",
+    "celebrityDetectionEnabled": false,
+    "maxEntities": 10,
+    "adminTask": true,
+    "folderPolicies": "app"
+}
