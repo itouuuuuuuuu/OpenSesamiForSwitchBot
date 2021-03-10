@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "MainActivity"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
-        private const val TAKE_PHOTO_INTERVAL = 3000L // ms
+        private const val TAKE_PHOTO_INTERVAL = 2500L // ms
     }
 
     private lateinit var cameraExecutor: ExecutorService
@@ -110,6 +110,7 @@ class MainActivity : AppCompatActivity() {
                 } catch (exception: Exception) {
                     Log.e(TAG, "Use case binding failed", exception)
                 } finally {
+                    image.close()
                     retryCountTextView.text = getString(R.string.retry_count, ++retryCount)
                     handler.postDelayed({ takePhoto() }, TAKE_PHOTO_INTERVAL)
                 }
