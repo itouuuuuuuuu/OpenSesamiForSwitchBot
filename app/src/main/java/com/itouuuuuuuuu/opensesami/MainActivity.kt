@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var cameraExecutor: ExecutorService
+    private var retryCount: Int = 0
     private var imageCapture: ImageCapture? = null
     private val handler = Handler()
 
@@ -48,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
+        retryCountTextView.text = getString(R.string.retry_count, 0)
         externalIdTextView.text = getString(R.string.external_image_id, null)
         confidenceTextView.text = getString(R.string.confidence, null)
 
@@ -108,6 +110,7 @@ class MainActivity : AppCompatActivity() {
                 } catch (exception: Exception) {
                     Log.e(TAG, "Use case binding failed", exception)
                 } finally {
+                    retryCountTextView.text = getString(R.string.retry_count, ++retryCount)
                     handler.postDelayed({ takePhoto() }, TAKE_PHOTO_INTERVAL)
                 }
             }
