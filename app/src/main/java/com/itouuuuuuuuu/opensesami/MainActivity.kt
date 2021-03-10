@@ -48,6 +48,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
+        externalIdTextView.text = getString(R.string.external_image_id, null)
+        confidenceTextView.text = getString(R.string.confidence, null)
 
         try {
             Amplify.addPlugin(AWSCognitoAuthPlugin())
@@ -96,8 +98,8 @@ class MainActivity : AppCompatActivity() {
                         { result ->
                             val identifyResult = result as IdentifyEntityMatchesResult
                             val match = identifyResult.entityMatches.firstOrNull()
-                            Log.i(TAG, "externalImageId: ${match?.externalImageId}")
-                            Log.i(TAG, "confidence: ${match?.confidence}")
+                            externalIdTextView.text = getString(R.string.external_image_id, match?.externalImageId)
+                            confidenceTextView.text = getString(R.string.confidence, match?.confidence.toString())
                         },
                         {
                             Log.e(TAG, "Identify failed", it)
