@@ -2,6 +2,7 @@ package com.itouuuuuuuuu.opensesami
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -38,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
         private const val TAKE_PHOTO_INTERVAL = 2500L // ms
-        private const val UNAUTHORIZED_THRESHOLD = 5 // ms
+        private const val UNAUTHORIZED_THRESHOLD = 3 // ms
     }
 
     private lateinit var cameraExecutor: ExecutorService
@@ -48,6 +49,9 @@ class MainActivity : AppCompatActivity() {
     private var pressedSwitchBot = false
 
     private val switchBotApi by lazy { SwitchBotApiService().createService() }
+
+    private val authorizedMediaPlayer by lazy { MediaPlayer.create(this, R.raw.okaerinasai) }
+    private val unauthorizedMediaPlayer by lazy { MediaPlayer.create(this, R.raw.daredaomae) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +82,18 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         handler.postDelayed({ takePhoto() }, 100)  // すぐに開始すると画像取得できない
+    }
+
+    override fun onPause() {
+        super.onPause()
+        authorizedMediaPlayer.apply {
+            stop()
+            release()
+        }
+        unauthorizedMediaPlayer.apply {
+            stop()
+            release()
+        }
     }
 
     override fun onDestroy() {
@@ -137,7 +153,9 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     retryCountTextView.text = getString(R.string.retry_count, ++retryCount)
-                    handler.postDelayed({ takePhoto() }, TAKE_PHOTO_INTERVAL)
+                    if (!pressedSwitchBot) {
+                        handler.postDelayed({ takePhoto() }, TAKE_PHOTO_INTERVAL)
+                    }
                 }
             }
 
@@ -176,6 +194,8 @@ class MainActivity : AppCompatActivity() {
         pressedSwitchBot = true
         switchBotApi.press().enqueue(object : Callback<SwitchBotPressResponse> {
             override fun onResponse(call: Call<SwitchBotPressResponse>, response: Response<SwitchBotPressResponse>) {
+                authorizedMediaPlayer.start()
+                handler.postDelayed({ finish() }, 3000)
             }
 
             override fun onFailure(call: Call<SwitchBotPressResponse>, t: Throwable) {
@@ -185,6 +205,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun unauthorized() {
-        finish()
+        unauthorizedMediaPlayer.start()
+        handler.postDelayed({ finish() }, 3000)
     }
 }
