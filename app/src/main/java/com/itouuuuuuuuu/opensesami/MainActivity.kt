@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
         private const val TAKE_PHOTO_INTERVAL = 2500L // ms
-        private const val UNAUTHORIZED_THRESHOLD = 3 // ms
+        private const val UNAUTHORIZED_THRESHOLD = 5 // ms
     }
 
     private lateinit var cameraExecutor: ExecutorService
