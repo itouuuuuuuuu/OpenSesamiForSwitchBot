@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
         private const val TAKE_PHOTO_INTERVAL = 2500L // ms
-        private const val UNAUTHORIZED_THRESHOLD = 5 // ms
+        private const val MAX_RETRY_COUNT = 3
     }
 
     private lateinit var cameraExecutor: ExecutorService
@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity() {
                 } finally {
                     image.close()
 
-                    if (retryCount >= UNAUTHORIZED_THRESHOLD) {
+                    if (retryCount >= MAX_RETRY_COUNT) {
                         unauthorized()
                         return
                     }
