@@ -18,14 +18,14 @@ interface ISwitchBotApiService {
         private const val DEVICE_ID = "FA98475977EC"
     }
 
-    @POST("/devices/$DEVICE_ID/commands")
+    @POST("/v1.0/devices/$DEVICE_ID/commands")
     fun press(@Body switchBotPressRequest: SwitchBotPressRequest): Call<SwitchBotPressResponse>
 }
 
 class SwitchBotApiService {
 
     companion object {
-        private const val API_BASE_URL = "https://api.switch-bot.com/v1.0"
+        private const val API_BASE_URL = "https://api.switch-bot.com/"
         private const val API_TOKEN = "88f4e93e2e6c0b060fd8b29052583fce7df5a4c0d0db9ac53bcc95c5780b249790b59a4250b4f8b591490ee58587fa02"
     }
 
@@ -50,8 +50,7 @@ class SwitchBotApiService {
                     val original = chain.request()
                     val request = original.newBuilder()
                         .header("Authorization", API_TOKEN)
-                        .addHeader("Content-Type", "application/json")
-                        .addHeader("Accept", "application/json; charset=utf8")
+                        .addHeader("Content-Type", "application/json; charset=utf8")
                         .method(original.method, original.body)
                         .build()
                     return@Interceptor chain.proceed(request)

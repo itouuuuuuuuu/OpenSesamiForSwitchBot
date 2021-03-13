@@ -17,9 +17,15 @@ import com.amplifyframework.core.Amplify
 import com.amplifyframework.predictions.aws.AWSPredictionsPlugin
 import com.amplifyframework.predictions.models.IdentifyActionType
 import com.amplifyframework.predictions.result.IdentifyEntityMatchesResult
+import com.itouuuuuuuuu.opensesami.api.SwitchBotApiService
 import com.itouuuuuuuuu.opensesami.extentions.resize
 import com.itouuuuuuuuu.opensesami.extentions.toBitmap
+import com.itouuuuuuuuu.opensesami.model.SwitchBotPressRequest
+import com.itouuuuuuuuu.opensesami.model.SwitchBotPressResponse
 import kotlinx.android.synthetic.main.activity_main.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -37,30 +43,34 @@ class MainActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
     private val handler = Handler()
 
+    private val switchBotApi by lazy { SwitchBotApiService().createService() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Request camera permissions
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-        }
+//        // Request camera permissions
+//        if (allPermissionsGranted()) {
+//            startCamera()
+//        } else {
+//            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+//        }
+//
+//        cameraExecutor = Executors.newSingleThreadExecutor()
+//        retryCountTextView.text = getString(R.string.retry_count, 0)
+//        externalIdTextView.text = getString(R.string.external_image_id, null)
+//        confidenceTextView.text = getString(R.string.confidence, null)
+//
+//        try {
+//            Amplify.addPlugin(AWSCognitoAuthPlugin())
+//            Amplify.addPlugin(AWSPredictionsPlugin())
+//            Amplify.configure(applicationContext)
+//            Log.i(TAG, "Initialized Amplify")
+//        } catch (error: AmplifyException) {
+//            Log.e(TAG, "Could not initialize Amplify", error)
+//        }
 
-        cameraExecutor = Executors.newSingleThreadExecutor()
-        retryCountTextView.text = getString(R.string.retry_count, 0)
-        externalIdTextView.text = getString(R.string.external_image_id, null)
-        confidenceTextView.text = getString(R.string.confidence, null)
-
-        try {
-            Amplify.addPlugin(AWSCognitoAuthPlugin())
-            Amplify.addPlugin(AWSPredictionsPlugin())
-            Amplify.configure(applicationContext)
-            Log.i(TAG, "Initialized Amplify")
-        } catch (error: AmplifyException) {
-            Log.e(TAG, "Could not initialize Amplify", error)
-        }
+        pressSwitchBot()
     }
 
     override fun onResume() {
@@ -100,8 +110,15 @@ class MainActivity : AppCompatActivity() {
                         { result ->
                             val identifyResult = result as IdentifyEntityMatchesResult
                             val match = identifyResult.entityMatches.firstOrNull()
+                            val confidence = match?.confidence
                             externalIdTextView.text = getString(R.string.external_image_id, match?.externalImageId)
-                            confidenceTextView.text = getString(R.string.confidence, match?.confidence.toString())
+                            confidenceTextView.text = getString(R.string.confidence, confidence?.toString())
+
+                            confidence?.let {
+                                if(it > 90) {
+                                    pressSwitchBot()
+                                }
+                            }
                         },
                         {
                             Log.e(TAG, "Identify failed", it)
@@ -145,5 +162,15 @@ class MainActivity : AppCompatActivity() {
             }
 
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun pressSwitchBot() {
+        switchBotApi.press(SwitchBotPressRequest()).enqueue(object : Callback<SwitchBotPressResponse> {
+            override fun onResponse( call: Call<SwitchBotPressResponse>, response: Response<SwitchBotPressResponse>) {
+            }
+
+            override fun onFailure(call: Call<SwitchBotPressResponse>, t: Throwable) {
+            }
+        })
     }
 }
