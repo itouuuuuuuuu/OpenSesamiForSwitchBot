@@ -19,7 +19,7 @@ interface ISwitchBotApiService {
     }
 
     @POST("/v1.0/devices/$DEVICE_ID/commands")
-    fun press(@Body switchBotPressRequest: SwitchBotPressRequest): Call<SwitchBotPressResponse>
+    fun press(@Body switchBotPressRequest: SwitchBotPressRequest = SwitchBotPressRequest()): Call<SwitchBotPressResponse>
 }
 
 class SwitchBotApiService {

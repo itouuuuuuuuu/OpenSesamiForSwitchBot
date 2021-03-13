@@ -23,6 +23,8 @@ import com.itouuuuuuuuu.opensesami.extentions.toBitmap
 import com.itouuuuuuuuu.opensesami.model.SwitchBotPressRequest
 import com.itouuuuuuuuu.opensesami.model.SwitchBotPressResponse
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -36,12 +38,14 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
         private const val TAKE_PHOTO_INTERVAL = 2500L // ms
+        private const val UNAUTHORIZED_THRESHOLD = 5 // ms
     }
 
     private lateinit var cameraExecutor: ExecutorService
     private var retryCount: Int = 0
     private var imageCapture: ImageCapture? = null
     private val handler = Handler()
+    private var pressedSwitchBot = false
 
     private val switchBotApi by lazy { SwitchBotApiService().createService() }
 
@@ -49,28 +53,26 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        // Request camera permissions
-//        if (allPermissionsGranted()) {
-//            startCamera()
-//        } else {
-//            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-//        }
-//
-//        cameraExecutor = Executors.newSingleThreadExecutor()
-//        retryCountTextView.text = getString(R.string.retry_count, 0)
-//        externalIdTextView.text = getString(R.string.external_image_id, null)
-//        confidenceTextView.text = getString(R.string.confidence, null)
-//
-//        try {
-//            Amplify.addPlugin(AWSCognitoAuthPlugin())
-//            Amplify.addPlugin(AWSPredictionsPlugin())
-//            Amplify.configure(applicationContext)
-//            Log.i(TAG, "Initialized Amplify")
-//        } catch (error: AmplifyException) {
-//            Log.e(TAG, "Could not initialize Amplify", error)
-//        }
+        // Request camera permissions
+        if (allPermissionsGranted()) {
+            startCamera()
+        } else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
 
-        pressSwitchBot()
+        cameraExecutor = Executors.newSingleThreadExecutor()
+        retryCountTextView.text = getString(R.string.retry_count, 0)
+        externalIdTextView.text = getString(R.string.external_image_id, null)
+        confidenceTextView.text = getString(R.string.confidence, null)
+
+        try {
+            Amplify.addPlugin(AWSCognitoAuthPlugin())
+            Amplify.addPlugin(AWSPredictionsPlugin())
+            Amplify.configure(applicationContext)
+            Log.i(TAG, "Initialized Amplify")
+        } catch (error: AmplifyException) {
+            Log.e(TAG, "Could not initialize Amplify", error)
+        }
     }
 
     override fun onResume() {
@@ -115,7 +117,7 @@ class MainActivity : AppCompatActivity() {
                             confidenceTextView.text = getString(R.string.confidence, confidence?.toString())
 
                             confidence?.let {
-                                if(it > 90) {
+                                if (!pressedSwitchBot && it > 80) {
                                     pressSwitchBot()
                                 }
                             }
@@ -128,6 +130,12 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "Use case binding failed", exception)
                 } finally {
                     image.close()
+
+                    if (retryCount >= UNAUTHORIZED_THRESHOLD) {
+                        unauthorized()
+                        return
+                    }
+
                     retryCountTextView.text = getString(R.string.retry_count, ++retryCount)
                     handler.postDelayed({ takePhoto() }, TAKE_PHOTO_INTERVAL)
                 }
@@ -165,12 +173,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun pressSwitchBot() {
-        switchBotApi.press(SwitchBotPressRequest()).enqueue(object : Callback<SwitchBotPressResponse> {
-            override fun onResponse( call: Call<SwitchBotPressResponse>, response: Response<SwitchBotPressResponse>) {
+        pressedSwitchBot = true
+        switchBotApi.press().enqueue(object : Callback<SwitchBotPressResponse> {
+            override fun onResponse(call: Call<SwitchBotPressResponse>, response: Response<SwitchBotPressResponse>) {
             }
 
             override fun onFailure(call: Call<SwitchBotPressResponse>, t: Throwable) {
+                pressedSwitchBot = false
             }
         })
+    }
+
+    private fun unauthorized() {
+        finish()
     }
 }
