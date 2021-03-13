@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">OpenSesami</string>
+    <string name="app_name">オートロック</string>
 
     <string name="retry_count">retry count: %1$d</string>
     <string name="external_image_id">external id: %1$s</string>

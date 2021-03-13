@@ -50,7 +50,8 @@ class MainActivity : AppCompatActivity() {
 
     private val switchBotApi by lazy { SwitchBotApiService().createService() }
 
-    private val authorizedMediaPlayer by lazy { MediaPlayer.create(this, R.raw.okaerinasai) }
+    private val initializeMediaPlayer by lazy { MediaPlayer.create(this, R.raw.kidou) }
+    private val authorizedMediaPlayer by lazy { MediaPlayer.create(this, R.raw.akerune) }
     private val unauthorizedMediaPlayer by lazy { MediaPlayer.create(this, R.raw.daredaomae) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,6 +78,8 @@ class MainActivity : AppCompatActivity() {
         } catch (error: AmplifyException) {
             Log.e(TAG, "Could not initialize Amplify", error)
         }
+
+        initializeMediaPlayer.start()
     }
 
     override fun onResume() {
@@ -86,14 +89,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        authorizedMediaPlayer.apply {
-            stop()
-            release()
-        }
-        unauthorizedMediaPlayer.apply {
-            stop()
-            release()
-        }
+        initializeMediaPlayer.release()
+        authorizedMediaPlayer.release()
+        unauthorizedMediaPlayer.release()
     }
 
     override fun onDestroy() {
