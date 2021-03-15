@@ -23,21 +23,27 @@ class SharedPreferencesManager(context: Context) {
     var takePhotoInterval: Long
         get() = prefs.getLong(TAKE_PHOTO_INTERVAL_HASH, 2500)
         set(value) {
-            editor.putLong(TAKE_PHOTO_INTERVAL_HASH, value)
-            editor.apply()
+            editor.apply {
+                putLong(TAKE_PHOTO_INTERVAL_HASH, value)
+                apply()
+            }
         }
 
     var maxRetryCount: Int
         get() = prefs.getInt(MAX_RETRY_COUNT_HASH, 5)
         set(value) {
-            editor.putInt(MAX_RETRY_COUNT_HASH, value)
-            editor.apply()
+            editor.apply {
+                putInt(MAX_RETRY_COUNT_HASH, value)
+                apply()
+            }
         }
 
     var confidenceThreshold: Int
         get() = prefs.getInt(CONFIDENCE_THRESHOLD_HASH, 80)
         set(value) {
-            editor.putInt(CONFIDENCE_THRESHOLD_HASH, value)
-            editor.apply()
+            editor.apply {
+                putInt(CONFIDENCE_THRESHOLD_HASH, value)
+                apply()
+            }
         }
 }
