@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
         private const val TAKE_PHOTO_INTERVAL = 2500L // ms
         private const val MAX_RETRY_COUNT = 3
+        private const val CONFIDENCE_THRESHOLD = 80
     }
 
     private lateinit var cameraExecutor: ExecutorService
@@ -53,6 +54,9 @@ class MainActivity : AppCompatActivity() {
     private val initializeMediaPlayer by lazy { MediaPlayer.create(this, R.raw.kidou) }
     private val authorizedMediaPlayer by lazy { MediaPlayer.create(this, R.raw.akerune) }
     private val unauthorizedMediaPlayer by lazy { MediaPlayer.create(this, R.raw.daredaomae) }
+
+    private val retryable
+        get() = retryCount < MAX_RETRY_COUNT
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,6 +119,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun takePhoto() {
+        if (pressedSwitchBot || !retryable) return
+
         val imageCapture = imageCapture ?: return
         imageCapture.takePicture(cameraExecutor, object : ImageCapture.OnImageCapturedCallback() {
             override fun onCaptureSuccess(image: ImageProxy) {
@@ -131,27 +137,23 @@ class MainActivity : AppCompatActivity() {
                             confidenceTextView.text = getString(R.string.confidence, confidence?.toString())
 
                             confidence?.let {
-                                if (!pressedSwitchBot && it > 80) {
-                                    pressSwitchBot()
-                                }
+                                if (it > CONFIDENCE_THRESHOLD) pressSwitchBot()
                             }
                         },
                         {
                             Log.e(TAG, "Identify failed", it)
+                            if (!retryable) {
+                                unauthorized()
+                                return@identify
+                            }
                         }
                     )
                 } catch (exception: Exception) {
                     Log.e(TAG, "Use case binding failed", exception)
                 } finally {
                     image.close()
-
-                    if (retryCount >= MAX_RETRY_COUNT) {
-                        unauthorized()
-                        return
-                    }
-
-                    retryCountTextView.text = getString(R.string.retry_count, ++retryCount)
                     if (!pressedSwitchBot) {
+                        retryCountTextView.text = getString(R.string.retry_count, ++retryCount)
                         handler.postDelayed({ takePhoto() }, TAKE_PHOTO_INTERVAL)
                     }
                 }
