@@ -1,5 +1,8 @@
 package com.itouuuuuuuuu.opensesami.api
 
+import android.content.Context
+import android.content.SharedPreferences
+import com.itouuuuuuuuu.opensesami.SharedPreferencesManager
 import com.itouuuuuuuuu.opensesami.model.SwitchBotPressRequest
 import com.itouuuuuuuuu.opensesami.model.SwitchBotPressResponse
 import com.squareup.moshi.Moshi
@@ -14,22 +17,20 @@ import retrofit2.http.*
 import java.util.concurrent.TimeUnit
 
 interface ISwitchBotApiService {
-    companion object {
-        private const val DEVICE_ID = "E3800E22F68B"
-    }
-
-    @POST("/v1.0/devices/$DEVICE_ID/commands")
-    fun press(@Body switchBotPressRequest: SwitchBotPressRequest = SwitchBotPressRequest()): Call<SwitchBotPressResponse>
+    @POST("/v1.0/devices/{deviceId}/commands")
+    fun press(@Path("deviceId") deviceId : String?, @Body switchBotPressRequest: SwitchBotPressRequest = SwitchBotPressRequest()): Call<SwitchBotPressResponse>
 }
 
 class SwitchBotApiService {
+    private lateinit var prefs: SharedPreferencesManager
 
     companion object {
         private const val API_BASE_URL = "https://api.switch-bot.com/"
-        private const val API_TOKEN = "88f4e93e2e6c0b060fd8b29052583fce7df5a4c0d0db9ac53bcc95c5780b249790b59a4250b4f8b591490ee58587fa02"
     }
 
-    fun createService(): ISwitchBotApiService {
+    fun createService(context: Context): ISwitchBotApiService {
+        prefs = SharedPreferencesManager(context)
+
         val moshi = Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()
@@ -49,7 +50,7 @@ class SwitchBotApiService {
                 .addInterceptor(Interceptor { chain ->
                     val original = chain.request()
                     val request = original.newBuilder()
-                        .header("Authorization", API_TOKEN)
+                        .header("Authorization", prefs.apiToken ?: "")
                         .addHeader("Content-Type", "application/json; charset=utf8")
                         .method(original.method, original.body)
                         .build()

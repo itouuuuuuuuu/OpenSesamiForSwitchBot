@@ -9,6 +9,8 @@
     <string name="confidence">confidence: %1$s</string>
 
     // setting
+    <string name="setting_device_id">SwitchBot デバイスID</string>
+    <string name="setting_api_token">SwitchBot APIトークン</string>
     <string name="setting_take_photo_interval">画像認識間隔(ms)</string>
     <string name="setting_max_retry_count">最大リトライ数</string>
     <string name="setting_confidence_threshold">類似度閾値</string>

@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var  handler: Handler
     private var pressedSwitchBot = false
 
-    private val switchBotApi by lazy { SwitchBotApiService().createService() }
+    private val switchBotApi by lazy { SwitchBotApiService().createService(this) }
 
     private val initializeMediaPlayer by lazy { MediaPlayer.create(this, R.raw.kidou) }
     private val authorizedMediaPlayer by lazy { MediaPlayer.create(this, R.raw.akerune) }
@@ -223,7 +223,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun pressSwitchBot() {
         pressedSwitchBot = true
-        switchBotApi.press().enqueue(object : Callback<SwitchBotPressResponse> {
+        switchBotApi.press(prefs.deviceId).enqueue(object : Callback<SwitchBotPressResponse> {
             override fun onResponse(call: Call<SwitchBotPressResponse>, response: Response<SwitchBotPressResponse>) {
                 authorizedMediaPlayer.start()
                 handler.postDelayed({ finish() }, 3000)

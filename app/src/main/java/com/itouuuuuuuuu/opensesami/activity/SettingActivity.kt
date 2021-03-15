@@ -18,6 +18,8 @@ class SettingActivity : AppCompatActivity() {
         title = getString(R.string.app_name_sub)
 
         // set setting
+        deviceIdEditText.setText(prefs.deviceId.toString(), TextView.BufferType.NORMAL)
+        apiTokenEditText.setText(prefs.apiToken.toString(), TextView.BufferType.NORMAL)
         intervalEditText.setText(prefs.takePhotoInterval.toString(), TextView.BufferType.NORMAL)
         maxRetryEditText.setText(prefs.maxRetryCount.toString(), TextView.BufferType.NORMAL)
         confidenceThresholdEditText.setText(prefs.confidenceThreshold.toString(), TextView.BufferType.NORMAL)
@@ -25,6 +27,8 @@ class SettingActivity : AppCompatActivity() {
         // apply setting
         applyButton.setOnClickListener {
             prefs.apply {
+                deviceId = deviceIdEditText.text.toString()
+                apiToken = apiTokenEditText.text.toString()
                 takePhotoInterval = intervalEditText.text.toString().toLong()
                 maxRetryCount = maxRetryEditText.text.toString().toInt()
                 confidenceThreshold = confidenceThresholdEditText.text.toString().toInt()
