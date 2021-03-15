@@ -1,12 +1,15 @@
-package com.itouuuuuuuuu.opensesami
+package com.itouuuuuuuuu.opensesami.activity
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -18,13 +21,12 @@ import com.amplifyframework.core.Amplify
 import com.amplifyframework.predictions.aws.AWSPredictionsPlugin
 import com.amplifyframework.predictions.models.IdentifyActionType
 import com.amplifyframework.predictions.result.IdentifyEntityMatchesResult
+import com.itouuuuuuuuu.opensesami.R
 import com.itouuuuuuuuu.opensesami.api.SwitchBotApiService
 import com.itouuuuuuuuu.opensesami.extentions.resize
 import com.itouuuuuuuuu.opensesami.extentions.toBitmap
-import com.itouuuuuuuuu.opensesami.model.SwitchBotPressRequest
 import com.itouuuuuuuuu.opensesami.model.SwitchBotPressResponse
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import retrofit2.Call
 import retrofit2.Callback
@@ -61,6 +63,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        title = getString(R.string.app_name_sub)
 
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -91,15 +94,11 @@ class MainActivity : AppCompatActivity() {
         handler.postDelayed({ takePhoto() }, 100)  // すぐに開始すると画像取得できない
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onDestroy() {
+        super.onDestroy()
         initializeMediaPlayer.release()
         authorizedMediaPlayer.release()
         unauthorizedMediaPlayer.release()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
         cameraExecutor.shutdown()
     }
 
@@ -112,6 +111,21 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.setting -> {
+                val intent = Intent(this, SettingActivity::class.java)
+                startActivity(intent)
+            }
+        }
+        return true
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
