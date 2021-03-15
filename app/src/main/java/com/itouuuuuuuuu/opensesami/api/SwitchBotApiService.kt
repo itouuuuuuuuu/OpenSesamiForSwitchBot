@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 
 interface ISwitchBotApiService {
     companion object {
-        private const val DEVICE_ID = "FA98475977EC"
+        private const val DEVICE_ID = "E3800E22F68B"
     }
 
     @POST("/v1.0/devices/$DEVICE_ID/commands")
