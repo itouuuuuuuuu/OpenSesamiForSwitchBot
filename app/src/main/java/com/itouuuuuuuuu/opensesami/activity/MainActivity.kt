@@ -22,12 +22,12 @@ import com.amplifyframework.predictions.aws.AWSPredictionsPlugin
 import com.amplifyframework.predictions.models.IdentifyActionType
 import com.amplifyframework.predictions.result.IdentifyEntityMatchesResult
 import com.itouuuuuuuuu.opensesami.R
+import com.itouuuuuuuuu.opensesami.SharedPreferencesManager
 import com.itouuuuuuuuu.opensesami.api.SwitchBotApiService
 import com.itouuuuuuuuu.opensesami.extentions.resize
 import com.itouuuuuuuuu.opensesami.extentions.toBitmap
 import com.itouuuuuuuuu.opensesami.model.SwitchBotPressResponse
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Dispatchers
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -40,15 +40,15 @@ class MainActivity : AppCompatActivity() {
         private const val TAG = "MainActivity"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
-        private const val TAKE_PHOTO_INTERVAL = 2500L // ms
-        private const val MAX_RETRY_COUNT = 5
-        private const val CONFIDENCE_THRESHOLD = 80
+        private const val SETTING_REQUEST = 11
     }
+
+    private val prefs by lazy { SharedPreferencesManager(this) }
 
     private lateinit var cameraExecutor: ExecutorService
     private var retryCount: Int = 0
     private var imageCapture: ImageCapture? = null
-    private val handler = Handler()
+    private lateinit var  handler: Handler
     private var pressedSwitchBot = false
 
     private val switchBotApi by lazy { SwitchBotApiService().createService() }
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
     private val unauthorizedMediaPlayer by lazy { MediaPlayer.create(this, R.raw.daredaomae) }
 
     private val retryable
-        get() = retryCount < MAX_RETRY_COUNT
+        get() = retryCount < prefs.maxRetryCount
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,7 +91,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        handler = Handler()
         handler.postDelayed({ takePhoto() }, 100)  // すぐに開始すると画像取得できない
+    }
+
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacksAndMessages(null)
     }
 
     override fun onDestroy() {
@@ -122,10 +128,21 @@ class MainActivity : AppCompatActivity() {
         when(item.itemId) {
             R.id.setting -> {
                 val intent = Intent(this, SettingActivity::class.java)
-                startActivity(intent)
+                startActivityForResult(intent, SETTING_REQUEST)
             }
         }
         return true
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            SETTING_REQUEST -> {
+                retryCount = 0
+                retryCountTextView.text = getString(R.string.retry_count, retryCount)
+                handler.postDelayed({ takePhoto() }, 100)
+            }
+        }
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
@@ -151,7 +168,7 @@ class MainActivity : AppCompatActivity() {
                             confidenceTextView.text = getString(R.string.confidence, confidence?.toString())
 
                             confidence?.let {
-                                if (it > CONFIDENCE_THRESHOLD) pressSwitchBot()
+                                if (it > prefs.confidenceThreshold) pressSwitchBot()
                             }
                         },
                         {
@@ -168,7 +185,7 @@ class MainActivity : AppCompatActivity() {
                     image.close()
                     if (!pressedSwitchBot) {
                         retryCountTextView.text = getString(R.string.retry_count, ++retryCount)
-                        handler.postDelayed({ takePhoto() }, TAKE_PHOTO_INTERVAL)
+                        handler.postDelayed({ takePhoto() }, prefs.takePhotoInterval)
                     }
                 }
             }
