@@ -226,7 +226,7 @@ class MainActivity : AppCompatActivity() {
         switchBotApi.press(prefs.deviceId).enqueue(object : Callback<SwitchBotPressResponse> {
             override fun onResponse(call: Call<SwitchBotPressResponse>, response: Response<SwitchBotPressResponse>) {
                 authorizedMediaPlayer.start()
-                handler.postDelayed({ finish() }, 4000)
+                handler.postDelayed({ finish() }, 3000)
             }
 
             override fun onFailure(call: Call<SwitchBotPressResponse>, t: Throwable) {
@@ -237,6 +237,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun unauthorized() {
         unauthorizedMediaPlayer.start()
-        handler.postDelayed({ finish() }, 4000)
+        handler.postDelayed({ finish() }, 3000)
     }
 }
