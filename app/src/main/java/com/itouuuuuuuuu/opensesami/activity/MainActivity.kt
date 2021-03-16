@@ -173,16 +173,15 @@ class MainActivity : AppCompatActivity() {
                         },
                         {
                             Log.e(TAG, "Identify failed", it)
-                            if (!retryable) {
-                                unauthorized()
-                                return@identify
-                            }
                         }
                     )
                 } catch (exception: Exception) {
                     Log.e(TAG, "Use case binding failed", exception)
                 } finally {
                     image.close()
+                    if (!retryable) {
+                        unauthorized()
+                    }
                     if (!pressedSwitchBot) {
                         retryCountTextView.text = getString(R.string.retry_count, ++retryCount)
                         handler.postDelayed({ takePhoto() }, prefs.takePhotoInterval)
